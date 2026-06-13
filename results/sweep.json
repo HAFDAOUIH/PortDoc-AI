@@ -1,0 +1,70 @@
+{
+  "n_questions": 10,
+  "rows": [
+    {
+      "mode": "dense",
+      "rerank": false,
+      "hit@5": 0.7,
+      "recall@5": 0.4258692185007974,
+      "hit@20": 0.8,
+      "recall@20": 0.601244019138756,
+      "mrr": 0.5243589743589744,
+      "ndcg@10": 0.4501534779917883
+    },
+    {
+      "mode": "dense",
+      "rerank": true,
+      "hit@5": 0.7,
+      "recall@5": 0.37829346092503985,
+      "hit@20": 0.8,
+      "recall@20": 0.601244019138756,
+      "mrr": 0.49102564102564106,
+      "ndcg@10": 0.39284429666633314
+    },
+    {
+      "mode": "sparse",
+      "rerank": false,
+      "hit@5": 0.5,
+      "recall@5": 0.23961722488038278,
+      "hit@20": 0.7,
+      "recall@20": 0.4588516746411483,
+      "mrr": 0.32916666666666666,
+      "ndcg@10": 0.3037971683436335
+    },
+    {
+      "mode": "sparse",
+      "rerank": true,
+      "hit@5": 0.6,
+      "recall@5": 0.32537480063795854,
+      "hit@20": 0.7,
+      "recall@20": 0.4588516746411483,
+      "mrr": 0.5611111111111111,
+      "ndcg@10": 0.42855113128304795
+    },
+    {
+      "mode": "hybrid",
+      "rerank": false,
+      "hit@5": 0.7,
+      "recall@5": 0.38870813397129184,
+      "hit@20": 0.8,
+      "recall@20": 0.5726794258373206,
+      "mrr": 0.566025641025641,
+      "ndcg@10": 0.4238328578192637
+    },
+    {
+      "mode": "hybrid",
+      "rerank": true,
+      "hit@5": 0.7,
+      "recall@5": 0.3844657097288676,
+      "hit@20": 0.8,
+      "recall@20": 0.5726794258373206,
+      "mrr": 0.5083333333333333,
+      "ndcg@10": 0.425848500877426
+    }
+  ],
+  "winner": {
+    "mode": "hybrid",
+    "rerank": false
+  },
+  "conclusion": "**Winner: hybrid (rerank off).** hybrid ≥ dense > **sparse** — sparse alone has the weakest ranking (it can't match paraphrases). Reranking helps the weak sparse ordering most (MRR +0.232) but does **not** beat the already-strong dense/hybrid+RRF here (hybrid MRR -0.058), so rerank is kept as a measured, toggleable option rather than an unconditional cost. With n=10, ±0.1 on hit-rate is noise; the robust signal is sparse << dense ≈ hybrid."
+}

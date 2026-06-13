@@ -1,0 +1,195 @@
+{
+  "corpus_fingerprint": "f6a1285066a3bceb",
+  "items": [
+    {
+      "id": "md-notif",
+      "question": "Combien de temps à l'avance faut-il notifier l'arrivée d'un navire transportant des marchandises dangereuses ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "anp-reglement-casablanca-fr:48"
+      ],
+      "expected_clearance": 0
+    },
+    {
+      "id": "portnet",
+      "question": "Par quelle plateforme l'agent maritime communique-t-il les informations à la capitainerie ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "anp-reglement-casablanca-fr:46",
+        "anp-reglement-casablanca-fr:48",
+        "anp-reglement-casablanca-fr:53",
+        "anp-reglement-casablanca-fr:54",
+        "anp-reglement-casablanca-fr:70",
+        "anp-reglement-casablanca-fr:71",
+        "anp-reglement-casablanca-fr:102",
+        "anp-reglement-casablanca-fr:188",
+        "anp-reglement-casablanca-fr:191",
+        "anp-reglement-casablanca-fr:284"
+      ],
+      "expected_clearance": 0
+    },
+    {
+      "id": "niveau3-ip",
+      "question": "Que doit faire l'installation portuaire au niveau de sûreté 3 ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "code-isps-fr:278",
+        "code-isps-fr:285",
+        "code-isps-fr:289",
+        "code-isps-fr:293",
+        "code-isps-fr:297",
+        "code-isps-fr:301"
+      ],
+      "expected_clearance": 2
+    },
+    {
+      "id": "pup-qui",
+      "question": "Qui doit disposer d'un plan d'urgence portuaire ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "loi-67-14-surete-portuaire-fr:78",
+        "loi-67-14-surete-portuaire-fr:85"
+      ],
+      "expected_clearance": 0
+    },
+    {
+      "id": "controle-acces",
+      "question": "Comment le contrôle d'accès au port est-il assuré ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "ilo-surete-ports-fr:21",
+        "ilo-surete-ports-fr:25",
+        "ilo-surete-ports-fr:29",
+        "ilo-surete-ports-fr:33"
+      ],
+      "expected_clearance": 2
+    },
+    {
+      "id": "identite",
+      "question": "Quel document d'identité est prévu pour accéder à l'installation portuaire ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "ilo-surete-ports-fr:3"
+      ],
+      "expected_clearance": 2
+    },
+    {
+      "id": "eval-ssa",
+      "question": "Qui réalise l'évaluation de la sûreté de l'installation portuaire ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "code-isps-fr:2",
+        "code-isps-fr:15",
+        "code-isps-fr:102",
+        "code-isps-fr:103",
+        "code-isps-fr:104",
+        "code-isps-fr:143",
+        "code-isps-fr:151",
+        "code-isps-fr:153",
+        "code-isps-fr:191",
+        "code-isps-fr:254",
+        "code-isps-fr:310"
+      ],
+      "expected_clearance": 2
+    },
+    {
+      "id": "plan-surete",
+      "question": "Que doit décrire le plan de sûreté de l'installation portuaire ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "code-isps-fr:15",
+        "code-isps-fr:69",
+        "code-isps-fr:78",
+        "code-isps-fr:100",
+        "code-isps-fr:101",
+        "code-isps-fr:104",
+        "code-isps-fr:105",
+        "code-isps-fr:106",
+        "code-isps-fr:107",
+        "code-isps-fr:108",
+        "code-isps-fr:143",
+        "code-isps-fr:144",
+        "code-isps-fr:145",
+        "code-isps-fr:151",
+        "code-isps-fr:166",
+        "code-isps-fr:185",
+        "code-isps-fr:191",
+        "code-isps-fr:263",
+        "code-isps-fr:321"
+      ],
+      "expected_clearance": 2
+    },
+    {
+      "id": "exploitant-oblig",
+      "question": "Quelles sont les obligations de l'exploitant d'une installation portuaire ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "anp-reglement-casablanca-fr:195"
+      ],
+      "expected_clearance": 0
+    },
+    {
+      "id": "incident-surete",
+      "question": "Qui prévient-on en cas d'incident de sûreté dans le port ?",
+      "type": "grounded",
+      "gold_chunk_ids": [
+        "anp-reglement-casablanca-fr:201"
+      ],
+      "expected_clearance": 0
+    },
+    {
+      "id": "ooc-ferry",
+      "question": "Quel est le prix d'un billet de ferry pour Barcelone ?",
+      "type": "out_of_corpus",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "ooc-meteo",
+      "question": "Quelle est la météo prévue au port demain ?",
+      "type": "out_of_corpus",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "ooc-recrut",
+      "question": "Quels postes sont ouverts au recrutement à Tanger Med ?",
+      "type": "out_of_corpus",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "ooc-resto",
+      "question": "Quels restaurants se trouvent près du port ?",
+      "type": "out_of_corpus",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "ooc-bourse",
+      "question": "Quel est le cours de l'action de Tanger Med en bourse aujourd'hui ?",
+      "type": "out_of_corpus",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "adv-niveau5",
+      "question": "Que doit faire l'installation portuaire au niveau de sûreté 5 ?",
+      "type": "adversarial",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "adv-terminal99",
+      "question": "Quelles sont les règles d'exploitation du terminal 99 ?",
+      "type": "adversarial",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "adv-2099",
+      "question": "Quel est le règlement d'exploitation du port pour l'année 2099 ?",
+      "type": "adversarial",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "adv-aerien",
+      "question": "Quelles sont les procédures de sûreté pour le trafic aérien ?",
+      "type": "adversarial",
+      "gold_chunk_ids": []
+    }
+  ]
+}

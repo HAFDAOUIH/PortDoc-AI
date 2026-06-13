@@ -1,0 +1,112 @@
+# PortDoc corpus manifest — the reproducible, fingerprinted description of every doc.
+#
+# These files ship locally in corpus/raw/ (several official Moroccan sources block
+# automated download). `sha256` guarantees integrity: `make fetch` recomputes each
+# hash and HARD-FAILS on any mismatch. `url` (where present) is provenance + lets
+# fetch re-download a missing file.
+#
+# clearance: omit to derive from doc_type; set explicitly for restricted material.
+#   0 = public | 1 = internal | 2 = restricted  (powers the RBAC retrieval filter §6.5)
+
+docs:
+  # ---- clearance 0 (public): annual reports, financial comms, newsletter ----
+  - id: tmsa-annual-2023-en
+    sha256: "566d0b789f6708611d1a4a4bdf9dd968c414b9eb9b4926e0404bd56c3c09b7d0"
+    doc_type: report
+    authority: TangerMed
+    year: 2023
+    lang: en
+    scanned: false
+
+  - id: tmsa-annual-2020-en
+    sha256: "34aeee21eae6fe5bf0a9908f6ca4fe9593565eb4e3b5bf39040617a5340b93eb"
+    doc_type: report
+    authority: TangerMed
+    year: 2020
+    lang: en
+    scanned: false
+
+  - id: tmsa-comfin-annuelle-2020-fr
+    sha256: "2444f36073d505472ecc7734d1c44518d9ae9f766726213155f7845006c48b96"
+    doc_type: report
+    authority: TangerMed
+    year: 2020
+    lang: fr
+    scanned: false
+
+  - id: tmsa-comfin-t4-2024-fr
+    sha256: "87388e8e939e79acf3eab7c8a5e815e7ff930fcaab76a61870bd59b745e408ab"
+    doc_type: report
+    authority: TangerMed
+    year: 2024
+    lang: fr
+    scanned: false
+
+  - id: tmsa-news-2025-en
+    sha256: "f6511241cdfa73656a1fd545fb34c389a5295f2c3da116dcf8853c3e6ccd9f77"
+    doc_type: report
+    authority: TangerMed
+    year: 2025
+    lang: en
+    scanned: false
+
+  # ---- clearance 0 (public): published regulation ----
+  - id: anp-reglement-casablanca-fr
+    url: https://www.anp.org.ma/fra/Documents%20partages/Lois_et_reglementation/Reglementations_portuaires/REGLEMENT_EXPLOITATION_CASABLANCA.pdf
+    sha256: "0353eb37f4b4d60c08d0c0ea1119c58e25332bfa64f8cc682945bca3f187613b"
+    doc_type: regulation
+    authority: ANP
+    year: 2012
+    lang: fr
+    scanned: false
+
+  - id: loi-67-14-surete-portuaire-fr
+    url: https://www.sgg.gov.ma/portals/0/AvantProjet/93/PL_67-14_Fr.pdf
+    sha256: "307ab0181668a72cfcc96ee300cfe2b5c06407bcfb56f34e6af2f33a17c04d29"
+    doc_type: regulation
+    authority: SGG
+    year: 2014
+    lang: fr
+    scanned: false
+
+  # ---- clearance 1 (internal): the SCANNED circular (drives the OCR pipeline) ----
+  # Generated from the Casablanca règlement (dangerous-goods pages) via
+  # scripts/make_scan.sh, because douane.gov.ma blocks automated download.
+  - id: circulaire-securite-md-scan-fr
+    sha256: "626e88100567778823d97660773acead5eede751a8f976f6527fe646f9c3dd5d"
+    doc_type: circular
+    authority: ANP
+    year: 2012
+    lang: fr
+    scanned: true
+    clearance: 1
+
+  # ---- clearance 2 (restricted): port security procedures (the RBAC stars) ----
+  - id: code-isps-fr
+    url: https://www.anp.org.ma/fra/Documents%20partages/Lois_et_reglementation/CodeISPS/Code_ISPS.pdf
+    sha256: "ceadfdeca7de06b073aa851e8bdd868949dd736a24e095a5252994878af97395"
+    doc_type: procedure
+    authority: ANP
+    year: 2004
+    lang: fr
+    scanned: false
+    clearance: 2
+
+  - id: dossier-surete-portuaire-fr
+    sha256: "c3c40709060971c34fd931ca1ab35aaebcbf87aff9afdc80059044e9e44896be"
+    doc_type: procedure
+    authority: ANP
+    year: 2012
+    lang: fr
+    scanned: false
+    clearance: 2
+
+  - id: ilo-surete-ports-fr
+    url: https://www.ilo.org/fr/media/270196/download
+    sha256: "6286b68ce4b8083a65a8df40fd6dec97be30b38d80fb3c008b11a5d7a58f9c19"
+    doc_type: procedure
+    authority: ILO
+    year: 2004
+    lang: fr
+    scanned: false
+    clearance: 2
