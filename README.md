@@ -27,10 +27,13 @@ answer (or an honest refusal)  —  100% local: embeddings, reranker, and LLM al
 - **🖼️ OCR pipeline** — scanned/born-digital routing (verified, not trusted from metadata)
   + a French OCR bake-off (`results/ocr_bakeoff.md`): Tesseract retained 99% of accents vs
   EasyOCR / RapidOCR.
-- **📊 Committed evaluation** — unit-tested retrieval metrics, a config sweep, and the RBAC
-  leakage check, all in `results/` (rendered live in the UI's *Trust & Evaluation* panel).
-- **💬 Streaming enterprise UI** — Next.js console with a persona switcher (the RBAC demo),
-  pipeline steps, citation-forward answers, and grounding chips.
+- **📊 Measured *and* graded** — deterministic retrieval metrics + a config sweep + the 0% RBAC
+  leakage check, **plus a strict generation eval** — the RAG triad (context relevance, faithfulness,
+  answer relevance) graded by a stronger `gpt-4o` judge, with deterministic refusal accuracy. All
+  committed to `results/` and rendered live in the UI's *Trust & Evaluation* panel.
+- **💬 Product-grade UI** — a Next.js *Sovereign Command Center*: streaming answers, a persona
+  switcher (the live RBAC demo), conversation history, a click-through source drawer, a document
+  knowledge-base, plain-language business-value framing, and citation-forward grounding chips.
 
 ---
 
@@ -46,7 +49,7 @@ QUERY (online)
       top-20 (access-controlled) ─► RRF fusion ─► cross-encoder rerank ─► top-5
       ─► local LLM: cited answer / <NO_ANSWER/>  ─► citation validation
 
-  Next.js dashboard ──HTTP/NDJSON stream──► FastAPI (/health /retrieve /ask /chat/stream /eval)
+  Next.js dashboard ──HTTP/NDJSON stream──► FastAPI (/health /retrieve /ask /chat/stream /eval /documents)
 ```
 
 ---
@@ -149,20 +152,38 @@ for a stable URL use a named tunnel + a Cloudflare account.
 
 ## Evaluation
 
-Deterministic retrieval metrics over a hand-labelled question set (`data/eval/qa_dataset.json`,
-fingerprint-guarded against re-chunk drift). Full results in [`results/`](results/).
+Evaluation is **first-class** here — three reproducible layers, all committed to
+[`results/`](results/): deterministic **retrieval** metrics, the **access-control** proof, and a
+strict **generation-quality** eval graded by a stronger judge.
 
-| Mode | Reranker | hit@5 | MRR | nDCG@10 |
-|---|---|---|---|---|
-| dense | off | 0.70 | 0.524 | 0.450 |
-| sparse | off | 0.50 | 0.329 | 0.304 |
-| **hybrid (winner)** | off | **0.70** | **0.566** | 0.424 |
+**1 · Retrieval** — deterministic, no LLM (hand-labelled set, fingerprint-guarded vs re-chunk drift):
 
-**RBAC leakage: 0 / 19 queries (0%)** — no restricted chunk ever surfaced at clearance 0.
+| Mode | hit@5 | MRR | nDCG@10 |
+|---|---|---|---|
+| dense | 0.70 | 0.524 | 0.450 |
+| sparse | 0.50 | 0.329 | 0.304 |
+| **hybrid (winner)** | **0.70** | **0.566** | 0.424 |
 
-Reranking helped the weak sparse ordering most (+0.232 MRR) but did **not** beat the strong
-hybrid+RRF baseline on this corpus, so it's kept as a measured, toggleable option. Regenerate
-with `make sweep`.
+**2 · Access control** — RBAC leakage **0 / 19 queries (0%)**: no restricted chunk surfaced at
+clearance 0. Enforced at retrieval *by construction*, not by a prompt instruction.
+
+**3 · Generation quality** — the RAG triad + refusal, strict rubric, judged by `gpt-4o`
+(`make eval-gen` → [`results/generation.md`](results/generation.md)):
+
+| Metric | Score |
+|---|---|
+| Context relevance (precision@5, rerank off → **on**) | **48% → 62%** |
+| Faithfulness — every cited claim backed by its source | **90%** |
+| Answer relevance | **95%** |
+| Refusal — out-of-corpus + adversarial | **9 / 9 · 0 hallucinated** |
+
+The judge runs **offline over public docs** — the served product stays 100% local. What the numbers
+say: even with recall-first retrieval (~50% precision), faithfulness is **90%** and hallucination is
+**0** — the generator grounds in the relevant chunks and refuses what it can't support. Cross-encoder
+**reranking is on** in the live path: it lifts context precision **+14pp** for ~150 ms (negligible vs
+generation); on rank-order, hybrid+RRF already saturates, so rerank is a precision lever, not recall.
+
+Regenerate: `make sweep` (retrieval + leakage) · `make eval-gen` (generation).
 
 ---
 
@@ -191,11 +212,11 @@ src/portdoc/
   index/       embed (dense+sparse) · store (Qdrant schema, hybrid search, RBAC filter)
   retrieval/   rerank · pipeline (retrieve = hybrid → RBAC → rerank → top-k)
   generation/  llm (LiteLLM) · prompts · citations (validating parser) · answer
-  eval/        retrieval_metrics · make_dataset · run (sweep + leakage)
+  eval/        retrieval_metrics · make_dataset · run (sweep + leakage) · generation_eval (RAG triad + refusal)
   api/         main (FastAPI) · schemas · personas
-frontend/      Next.js streaming dashboard
+frontend/      Next.js "Sovereign Command Center" (app/components/*)
 data/          corpus/manifest.yaml · corpus/chunks.jsonl (committed) · eval/qa_dataset.json
-results/       sweep · leakage · ocr_bakeoff
+results/       sweep · leakage · ocr_bakeoff · generation (RAG triad)
 tests/         59 unit tests (metrics, citations, chunking, filters, …)
 ```
 
@@ -224,11 +245,13 @@ make ingest        # parse + OCR + chunk + index   (needs tesseract/poppler/imag
 
 ## Limitations & roadmap
 
-- **CPU latency** — 7B generation is slow on CPU; production runs on a GPU profile (vLLM /
-  Ollama-on-GPU). Embeddings stay ONNX-CPU (one-time indexing cost).
+- **Latency** — generation runs on an on-prem GPU (Mistral Small 24B on an L4: ~2–4 s to first
+  token, ~10–15 s full answer). CPU-only is the sovereignty fallback (minutes/answer).
+- **Small eval set** — n = 10 grounded / 19 total: directional, not a leaderboard. The harness
+  scales to more questions as the corpus grows.
 - **Scoped out:** Arabic/Darija (FR/EN only). Documented, not built.
-- **Roadmap:** Qwen3-Embedding + bge-m3 learned-sparse + Qwen3-Reranker on the GPU profile;
-  LLM-judge faithfulness scoring; PaddleOCR-VL evaluation; Intel NPU/iGPU acceleration.
+- **Roadmap:** SOTA GPU stack (Qwen3-Embedding + bge-m3 learned-sparse + Qwen3-Reranker); admin
+  usage analytics; self-service document onboarding; SSO / Active-Directory auth.
 
 ---
 
