@@ -7,7 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-MODEL="${PORTDOC_LLM_MODEL:-mistral:7b}"
+MODEL="${PORTDOC_LLM_MODEL:-mistral-small:24b}"
 
 echo "==> 1/5 Python env (uv)"
 command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh

@@ -65,18 +65,21 @@ QUERY (online)
 
 ### Run it
 
+**Fastest:** `./setup.sh` runs steps 1–4 (installs uv + Ollama if missing, starts Qdrant,
+pulls the model, builds the index) — then jump to step 5. Or step by step:
+
 ```bash
 # 1. Python env
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync --extra dev
 
-# 2. Vector DB
-docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
+# 2. Vector DB  (don't `docker rm` it — the index lives inside the container)
+docker run -d --name qdrant -p 6333:6333 qdrant/qdrant   # already created? → docker start qdrant
 
-# 3. Local LLM (Ollama uses the GPU automatically if present → ~2-5s/answer)
-ollama pull mistral:7b
+# 3. Local LLM — Ollama uses the GPU automatically if present
+ollama pull mistral-small:24b
 
-# 4. Build the index from the committed chunks
+# 4. Build the index from the committed chunks  (one-time; ~17 min on CPU)
 make index
 
 # 5. Serve — two terminals
@@ -84,13 +87,60 @@ make api          # FastAPI  → http://localhost:8000
 make ui           # Next.js  → http://localhost:3000
 ```
 
-Open **http://localhost:3000**. Try: ask a security question as *Salma (Port Security,
-clearance 2)*, then switch to *Nadia (Reception, clearance 0)* and ask the same thing —
-watch the restricted sources disappear.
+**Check each step is green before the next:**
 
-> **On a CPU-only machine** the local LLM is slow (~1–2 min/answer; it's prefill-bound on
-> a 7B model). That's the sovereignty trade-off. On a GPU box (e.g. Lightning.ai) Ollama
-> uses the GPU and answers in ~2–5 s — `make` steps are identical.
+```bash
+curl -s localhost:6333/healthz                          # Qdrant: healthz check passed
+curl -s localhost:8000/health | python3 -m json.tool    # expect "qdrant_points": 2033
+ollama ps                                               # mistral-small:24b · "100% GPU"
+```
+
+Open **http://localhost:3000** → ask a security question as *Salma (PFSO, clearance 2)*,
+then switch to *Nadia (Reception, clearance 0)* and ask the same thing — watch the
+restricted sources disappear (**🔒 5 hidden**).
+
+> **Latency (L4 · `mistral-small:24b` ≈ 17 tok/s):** streamed answers start in **~2–4 s**; a full
+> cited answer completes in **~10–15 s**, refusals in **~3–4 s** — fully local. Want it snappier?
+> Use a lighter model (`mistral-nemo:12b`) or lower `PORTDOC_GEN_MAX_TOKENS`. CPU-only is the
+> sovereignty fallback (minutes/answer); the `make` steps are identical either way.
+
+### Pre-flight for a live demo
+
+The **first** generation after a fresh start loads the model into VRAM (a one-time ~10–50 s);
+every call after is fast. Warm **and pin** the model before presenting so it never reloads
+mid-session:
+
+```bash
+curl -s localhost:11434/api/generate \
+  -d '{"model":"mistral-small:24b","prompt":"ok","keep_alive":-1}' >/dev/null   # warm + keep resident
+```
+
+Green-light check: `/health` must show `qdrant_points: 2033`. If it shows `0`, the index
+didn't persist (e.g. the Qdrant container was recreated) — re-run `make index`.
+
+### Expose it publicly (Cloudflare — one tunnel)
+
+The UI proxies `/api` to the backend **server-side** (`next.config.mjs` rewrite), so a single
+tunnel on port 3000 exposes the whole app — streaming included, no CORS, no second URL. With
+`make api` (:8000) and `make ui` (:3000) both running:
+
+```bash
+cloudflared tunnel --url http://localhost:3000
+```
+
+Open the printed `https://….trycloudflare.com` link. Keep `make api` running (the proxy
+forwards to it). Quick tunnels need no account; the URL is ephemeral and changes each run —
+for a stable URL use a named tunnel + a Cloudflare account.
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `/health` shows `qdrant_points: 0` | Index missing → `make index` (don't `docker rm` the qdrant container) |
+| Port 8000 already in use | `uv run uvicorn portdoc.api.main:app --port 8001`, then set `frontend/.env.local` → `NEXT_PUBLIC_API_BASE=http://localhost:8001` |
+| UI loads but every answer errors | Browser can't reach the API. On a remote/Lightning host set `frontend/.env.local` → `NEXT_PUBLIC_API_BASE=<public URL of port 8000>` (CORS is open) |
+| First answer ~30–50 s, the rest fast | Cold model load — run the warm-up above before the demo |
+| `ollama ps` shows `100% CPU` | Ollama didn't grab the GPU; restart `ollama serve` once the driver is up |
 
 ### Make targets
 `make install · fetch · index · ingest · sweep · search Q="…" · api · ui · test`
@@ -121,12 +171,12 @@ with `make sweep`.
 | Layer | Choice | Why |
 |---|---|---|
 | Parsing / OCR | Docling + **Tesseract `fra`** | best French accent retention (measured) |
-| Chunking | Docling `HybridChunker`, 512-tok cap, contextual headers | structure-aware; embedder-matched tokenizer |
+| Chunking | Docling `HybridChunker`, 512-tok cap, contextual headers | structure-aware; sized with the Qwen3-Embedding tokenizer |
 | Vector DB | **Qdrant** | lightest self-hostable DB with native sparse + server-side RRF fusion |
 | Dense embed | `multilingual-e5-large` (ONNX/FastEmbed) | multilingual, ~10× faster than fp32 torch on CPU |
 | Sparse embed | BM25-french | commercially-licensed multilingual lexical signal |
 | Reranker | `bge-reranker-base` (MIT, multilingual) | jina-v2 multilingual rejected (CC-BY-NC) |
-| LLM | Mistral 7B via Ollama (swappable via LiteLLM) | self-hosted; one-line swap to vLLM/cloud |
+| LLM | Mistral Small 24B via Ollama (swappable via LiteLLM) | French-native, self-hosted; one-line swap to vLLM/cloud |
 | API / UI | FastAPI + Next.js 14 (Tailwind, Recharts) | streaming console; API is the product |
 
 All retrieval/generation runs locally — no hosted embedding or LLM API.
@@ -156,7 +206,7 @@ Defaults run fully local — no `.env` needed. Override any setting via `PORTDOC
 
 ```bash
 PORTDOC_LLM_BACKEND=ollama        # ollama | vllm | openai
-PORTDOC_LLM_MODEL=mistral:7b
+PORTDOC_LLM_MODEL=mistral-small:24b
 ```
 
 ## Re-ingestion (optional)

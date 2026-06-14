@@ -1,4 +1,4 @@
-.PHONY: install fetch test test-slow chunk index ingest search dataset sweep api ui
+.PHONY: install fetch test test-slow chunk index ingest search dataset sweep eval-gen api ui
 
 install:  ## sync the Python env from the lockfile
 	uv sync --extra dev
@@ -28,6 +28,9 @@ dataset:  ## build the labelled eval dataset (gold chunk ids + fingerprint)
 
 sweep:  ## run the retrieval sweep + RBAC leakage check -> results/
 	uv run python -m portdoc.eval.run
+
+eval-gen:  ## generation eval: refusal accuracy + faithfulness (LLM-judge) -> results/generation.*
+	uv run python -m portdoc.eval.generation_eval
 
 api:  ## run the FastAPI backend (port 8000)
 	uv run uvicorn portdoc.api.main:app --port 8000

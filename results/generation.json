@@ -1,0 +1,104 @@
+{
+  "served_model": "mistral-small:24b",
+  "judge_model": "gpt-4o",
+  "judge_backend": "openai",
+  "n_questions": 19,
+  "grounded_total": 10,
+  "grounded_answered": 10,
+  "over_refusals": [],
+  "refuse_total": 9,
+  "refuse_correct": 9,
+  "hallucinated": [],
+  "context_relevance": 0.48,
+  "context_judged": 10,
+  "context_relevance_reranked": 0.62,
+  "context_reranked_judged": 10,
+  "answer_relevance": 0.95,
+  "answer_judged": 10,
+  "faithfulness": 0.9,
+  "faith_judged": 10,
+  "claims_total": 21,
+  "claims_supported": 20,
+  "detail": [
+    {
+      "id": "md-notif",
+      "ctx": 0.4,
+      "ctx_rr": 0.6,
+      "ans_rel": 1.0,
+      "faith": "1/1",
+      "refused": false
+    },
+    {
+      "id": "portnet",
+      "ctx": 0.8,
+      "ctx_rr": 1.0,
+      "ans_rel": 1.0,
+      "faith": "1/1",
+      "refused": false
+    },
+    {
+      "id": "niveau3-ip",
+      "ctx": 0.4,
+      "ctx_rr": 1.0,
+      "ans_rel": 1.0,
+      "faith": "2/2",
+      "refused": false
+    },
+    {
+      "id": "pup-qui",
+      "ctx": 0.4,
+      "ctx_rr": 0.2,
+      "ans_rel": 1.0,
+      "faith": "1/1",
+      "refused": false
+    },
+    {
+      "id": "controle-acces",
+      "ctx": 0.6,
+      "ctx_rr": 0.4,
+      "ans_rel": 1.0,
+      "faith": "4/4",
+      "refused": false
+    },
+    {
+      "id": "identite",
+      "ctx": 0.2,
+      "ctx_rr": 0.2,
+      "ans_rel": 0.5,
+      "faith": "1/1",
+      "refused": false
+    },
+    {
+      "id": "eval-ssa",
+      "ctx": 0.6,
+      "ctx_rr": 0.6,
+      "ans_rel": 1.0,
+      "faith": "2/2",
+      "refused": false
+    },
+    {
+      "id": "plan-surete",
+      "ctx": 0.4,
+      "ctx_rr": 0.4,
+      "ans_rel": 1.0,
+      "faith": "4/4",
+      "refused": false
+    },
+    {
+      "id": "exploitant-oblig",
+      "ctx": 0.6,
+      "ctx_rr": 1.0,
+      "ans_rel": 1.0,
+      "faith": "4/4",
+      "refused": false
+    },
+    {
+      "id": "incident-surete",
+      "ctx": 0.4,
+      "ctx_rr": 0.8,
+      "ans_rel": 1.0,
+      "faith": "0/1",
+      "refused": false
+    }
+  ]
+}

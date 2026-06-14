@@ -4,8 +4,89 @@
 
 html { color-scheme: dark; }
 
+body {
+  /* "Sovereign Command Center" — deep navy base with a subtle radial cyan/blue glow.
+     The faint grid overlay lives on a fixed pseudo-element (see ::before) so it never
+     scrolls or repaints with content. */
+  background-color: #020617; /* slate-950 */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34, 211, 238, 0.10), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(37, 99, 235, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Faint grid + slow aurora drift, fixed behind everything. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 35%, transparent 80%);
+          mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 35%, transparent 80%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: -30%;
+  left: -10%;
+  width: 60vw;
+  height: 60vw;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.10), transparent 65%);
+  filter: blur(60px);
+  animation: aurora 22s ease-in-out infinite alternate;
+}
+
+@keyframes aurora {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.7; }
+  100% { transform: translate(20vw, 12vh) scale(1.25); opacity: 1; }
+}
+
+/* App chrome must sit above the fixed background layers. */
+#app-root { position: relative; z-index: 1; }
+
+/* ---------- scrollbars ---------- */
+* { scrollbar-width: thin; scrollbar-color: rgba(100, 116, 139, 0.4) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.35);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgba(148, 163, 184, 0.55); }
+
+/* ---------- legacy keyframes still referenced by markup ---------- */
 @keyframes shimmer { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 .shimmer { animation: shimmer 1.4s ease-in-out infinite; }
 
 @keyframes popIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .pop-in { animation: popIn 0.25s ease-out; }
+
+/* Signature gradient text helper. */
+.text-gradient {
+  background-image: linear-gradient(90deg, #22d3ee, #3b82f6);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+
+/* ---------- reduced motion: gate all non-essential animation ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body::after { animation: none; }
+  .shimmer, .pop-in { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

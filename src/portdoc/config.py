@@ -85,11 +85,18 @@ class Settings(BaseSettings):
     # LiteLLM treats all three as OpenAI-compatible endpoints; only this string
     # plus the api_base/model id change between profiles.
     llm_backend: str = "ollama"  # one of: vllm | ollama | openai — local by default
-    llm_model: str = "mistral:7b"  # local self-hosted default (the sovereignty profile)
+    llm_model: str = "mistral-small:24b"  # self-hosted default (French-native, on-prem GPU profile)
     llm_api_base: str | None = None
     llm_api_key: str | None = None
     gen_max_tokens: int = 512        # cap answer length — main CPU latency lever
     gen_temperature: float = 0.1
+
+    # --- eval judge (slice 7) ------------------------------------------------
+    # A SEPARATE, stronger model grades faithfulness. Offline measurement only —
+    # it never serves a user — so a cloud judge over PUBLIC docs doesn't dent the
+    # (fully local) product's sovereignty. Cloud path uses llm_api_key.
+    judge_backend: str = "openai"   # openai | ollama | vllm
+    judge_model: str = "gpt-4o"     # must out-rank the served model (gpt-4o >> mistral-small:24b)
 
     def ensure_dirs(self) -> None:
         """Create the directories we own. Cheap, idempotent, called by entrypoints."""

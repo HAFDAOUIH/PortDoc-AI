@@ -1,5 +1,7 @@
 // Typed client for the PortDoc FastAPI backend.
-const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+// Default: same-origin "/api" proxy (see next.config.mjs rewrites) so one tunnel exposes
+// the whole app. Override with NEXT_PUBLIC_API_BASE to call the backend directly.
+const BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
 export type Source = {
   n: number;
@@ -28,6 +30,18 @@ export type Health = {
   qdrant_points: number;
 };
 
+// One row per document in the corpus — powers the Knowledge-base view (GET /documents).
+export type DocumentMeta = {
+  doc_id: string;
+  authority: string;
+  doc_type: string;
+  year: number;
+  lang: string;
+  clearance: number;
+  from_ocr: boolean;
+  n_chunks: number;
+};
+
 export type RetrieveResponse = { sources: Source[]; hidden_by_clearance: number; took_ms: number };
 export type AskResponse = {
   answer: string;
@@ -46,6 +60,23 @@ export type EvalData = {
     conclusion: string;
   } | null;
   leakage: { n_queries: number; leaks: number; restricted_questions: number; leakage_rate: number } | null;
+  generation?: {
+    served_model: string;
+    judge_model: string;
+    judge_backend: string;
+    n_questions: number;
+    grounded_total: number;
+    grounded_answered: number;
+    over_refusals: string[];
+    refuse_total: number;
+    refuse_correct: number;
+    hallucinated: string[];
+    context_relevance: number | null;
+    answer_relevance: number | null;
+    faithfulness: number | null;
+    claims_total: number;
+    claims_supported: number;
+  } | null;
 };
 
 async function post<T>(path: string, body: unknown): Promise<T> {
@@ -79,6 +110,7 @@ export const api = {
   retrieve: (query: string, user_clearance: number): Promise<RetrieveResponse> =>
     post("/retrieve", { query, user_clearance }),
   eval: (): Promise<EvalData> => fetch(`${BASE}/eval`).then((r) => r.json()),
+  documents: (): Promise<DocumentMeta[]> => fetch(`${BASE}/documents`).then((r) => r.json()),
 };
 
 // Stream the chat pipeline (NDJSON: step → sources → token* → done).
