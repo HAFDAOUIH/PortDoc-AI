@@ -1,9 +1,9 @@
-.PHONY: install fetch test
+.PHONY: install fetch test test-slow chunk index ingest search dataset sweep api ui
 
-install:  ## sync the env from the lockfile
+install:  ## sync the Python env from the lockfile
 	uv sync --extra dev
 
-fetch:  ## download + integrity-check the corpus from the manifest
+fetch:  ## download + integrity-check the corpus from the manifest (URL docs only)
 	uv run python -m portdoc.ingestion.fetch
 
 test:  ## run fast unit tests
@@ -12,11 +12,13 @@ test:  ## run fast unit tests
 test-slow:  ## run heavy integration tests (load docling / real corpus)
 	uv run pytest -q -m slow
 
-chunk:  ## parse + chunk the whole corpus -> data/corpus/chunks.jsonl
+chunk:  ## parse + chunk the corpus -> data/corpus/chunks.jsonl (needs raw PDFs + OCR deps)
 	uv run python -m portdoc.ingestion.chunk
 
-index:  ## embed all chunks (dense+sparse) and upsert into Qdrant
+index:  ## embed all chunks (dense+sparse) into Qdrant (works from committed chunks.jsonl)
 	uv run python -m portdoc.index.store index
+
+ingest: chunk index  ## full re-ingestion: parse + chunk + index (needs raw PDFs)
 
 search:  ## ad-hoc hybrid search: make search Q="your question"
 	uv run python -m portdoc.index.store search "$(Q)"
@@ -24,11 +26,11 @@ search:  ## ad-hoc hybrid search: make search Q="your question"
 dataset:  ## build the labelled eval dataset (gold chunk ids + fingerprint)
 	uv run python -m portdoc.eval.make_dataset
 
-sweep:  ## run the retrieval sweep -> results/sweep.md
+sweep:  ## run the retrieval sweep + RBAC leakage check -> results/
 	uv run python -m portdoc.eval.run
 
-api:  ## run the FastAPI backend (port 8077)
-	uv run uvicorn portdoc.api.main:app --port 8077
+api:  ## run the FastAPI backend (port 8000)
+	uv run uvicorn portdoc.api.main:app --port 8000
 
 ui:  ## run the Next.js dashboard (port 3000; needs the API running)
-	cd frontend && npm run dev
+	cd frontend && npm install && npm run dev
