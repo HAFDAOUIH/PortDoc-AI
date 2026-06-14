@@ -18,11 +18,9 @@ dependencies = [
     "rapidocr-onnxruntime>=1.4", # OCR engine for the bake-off (lightweight, onnx)
     "onnxruntime>=1.18",
     "easyocr>=1.7",             # Docling's default OCR — included so we can measure it
-    # --- slice 4: embeddings + vector DB ---
+    # --- slice 4: embeddings + vector DB (default CPU profile is ONNX via fastembed) ---
     "qdrant-client>=1.12",
-    "sentence-transformers>=3.0", # dense encoder (Qwen3-Embedding)
-    "FlagEmbedding>=1.3",         # sparse encoder (bge-m3 learned lexical weights)
-    "fastembed>=0.8.0",
+    "fastembed>=0.8.0",  # dense (e5-large ONNX) + sparse (BM25) + cross-encoder reranker — the live path
     "litellm>=1.88.1",
     "fastapi>=0.136.3",
     "uvicorn[standard]>=0.49.0",
@@ -31,6 +29,12 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+]
+# Optional SOTA GPU profile — Qwen3-Embedding (dense) + bge-m3 (learned sparse).
+# The default CPU/ONNX path (fastembed) does NOT need these; install with `uv sync --extra gpu`.
+gpu = [
+    "sentence-transformers>=3.0",  # Qwen3-Embedding dense encoder
+    "FlagEmbedding>=1.3",          # bge-m3 learned-sparse encoder
 ]
 
 # CPU-only torch: this is a machine without an NVIDIA GPU, so pull the CPU wheels
