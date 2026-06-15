@@ -82,16 +82,6 @@ before the model ever sees them (<b>measured leakage: 0 / 19 queries</b>) — an
 an explicit <b>“No answer”</b> rather than inventing one (<b>9 / 9</b> out-of-scope &amp; adversarial
 questions refused, <b>0 hallucinated</b>).</sub>
 
-<!-- BEST-IN-CLASS RBAC DIPTYCH — uncomment once docs/img/ask-nadia.png is captured
-     (Nadia, clearance 0, asks the SAME level-3 question → denied + 🔒 hidden):
-<table>
-<tr>
-<td width="50%"><img src="docs/img/ask-salma.png"><br><sub><b>Salma · PFSO · clearance 2</b> — answers from the restricted ISPS procedure.</sub></td>
-<td width="50%"><img src="docs/img/ask-nadia.png"><br><sub><b>Nadia · Reception · clearance 0</b> — same question, <b>🔒 5 sources hidden</b>.</sub></td>
-</tr>
-</table>
--->
-
 ### 3 · The knowledge base — every document, classified
 
 <p align="center">
@@ -114,7 +104,7 @@ enforced at the database query — **before** anything reaches the model.
 </p>
 
 <details>
-<summary>📐 Mermaid source (GitHub renders this interactively)</summary>
+<summary>Mermaid source</summary>
 
 ```mermaid
 flowchart LR
@@ -169,7 +159,7 @@ flowchart LR
 </p>
 
 <details>
-<summary>📐 Mermaid source (GitHub renders this interactively)</summary>
+<summary>Mermaid source</summary>
 
 ```mermaid
 sequenceDiagram
