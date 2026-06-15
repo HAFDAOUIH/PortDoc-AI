@@ -105,18 +105,107 @@ the labels that drive access control — held entirely on-premise.</sub>
 
 ## Architecture
 
-```
-INGEST (offline)
-  PDF ─► route (scanned? OCR : born-digital) ─► Docling parse ─► HybridChunker
-      ─► contextual headers ─► dense + sparse embed ─► Qdrant (named vectors + payload)
+Two pipelines: an **offline ingest** that builds an integrity-checked index, and an **online
+query** path that is access-controlled, reranked, and grounded. The security boundary (RBAC) is
+enforced at the database query — **before** anything reaches the model.
 
-QUERY (online)
-  question + persona ─► embed ─► Qdrant hybrid search ──[clearance filter, both branches]──►
-      top-20 (access-controlled) ─► RRF fusion ─► cross-encoder rerank ─► top-5
-      ─► local LLM: cited answer / <NO_ANSWER/>  ─► citation validation
+<p align="center">
+  <img src="docs/img/architecture.png" alt="PortDoc system architecture — offline ingest, access-controlled online query, and the offline trust/eval loop" width="100%">
+</p>
 
-  Next.js dashboard ──HTTP/NDJSON stream──► FastAPI (/health /retrieve /ask /chat/stream /eval /documents)
+<details>
+<summary>📐 Mermaid source (GitHub renders this interactively)</summary>
+
+```mermaid
+flowchart LR
+    subgraph INGEST["🛠️ Ingest · offline · reproducible"]
+        direction TB
+        P["Source PDFs<br/>manifest + sha256"] --> R{"Scanned?<br/>verify bytes"}
+        R -->|image-only| O["OCR · Tesseract fra"]
+        R -->|born-digital| D["Docling parse<br/>+ tables"]
+        O --> D
+        D --> C["HybridChunker<br/>contextual headers<br/>+ clearance tag"]
+        C --> E["Embed<br/>dense e5-large ONNX<br/>+ sparse BM25-fr"]
+    end
+
+    DB[("Qdrant<br/>named vectors<br/>+ payload index")]
+    E --> DB
+
+    subgraph QUERY["⚡ Query · online · 100% on-prem"]
+        direction TB
+        Q["Question + persona"] --> EQ["Embed query"]
+        EQ --> H["Hybrid search<br/>dense + sparse"]
+        H --> SEC{{"🔒 RBAC filter<br/>clearance ≤ user<br/>both branches"}}
+        SEC --> F["RRF fusion<br/>top-20"]
+        F --> RK["Cross-encoder<br/>rerank → top-5"]
+        RK --> G["LLM · LiteLLM → Ollama<br/>mistral-small:24b"]
+        G --> V["Citation validation<br/>+ refusal sentinel"]
+        V --> A["Cited answer<br/>or honest refusal"]
+    end
+
+    DB -. "access-controlled<br/>retrieval" .-> H
+    SEC -. "restricted chunks dropped<br/>before fusion" .-> N["🚫 never enter<br/>the LLM context"]
+
+    subgraph TRUST["📊 Trust · offline · committed to results/"]
+        direction TB
+        T1["Retrieval sweep<br/>hit@5 · MRR · nDCG"]
+        T2["RBAC leakage<br/>0 / 19 queries"]
+        T3["RAG triad<br/>judged by gpt-4o"]
+    end
+    DB -.-> T1
+
+    classDef sec fill:#3b0a0a,stroke:#fb7185,stroke-width:2px,color:#fecdd3;
+    class SEC,N sec;
+    classDef store fill:#082f49,stroke:#38bdf8,color:#e0f2fe;
+    class DB store;
 ```
+
+</details>
+
+**Request lifecycle** — one question, end to end:
+
+<p align="center">
+  <img src="docs/img/sequence.png" alt="Request lifecycle — user to UI to API to Qdrant (RBAC filter) to reranker to local LLM to cited answer" width="100%">
+</p>
+
+<details>
+<summary>📐 Mermaid source (GitHub renders this interactively)</summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as User · persona
+    participant UI as Next.js UI
+    participant API as FastAPI
+    participant VEC as Qdrant
+    participant RK as Cross-encoder
+    participant LLM as Ollama · local
+    U->>UI: question + selected persona
+    UI->>API: POST /chat/stream
+    API->>VEC: hybrid search — clearance filter ON
+    Note over VEC: restricted chunks excluded BEFORE fusion<br/>RBAC by construction, not by prompt
+    VEC-->>API: top-20 access-controlled candidates
+    API->>RK: rerank candidates
+    RK-->>API: top-5
+    API->>LLM: system prompt + numbered sources
+    LLM-->>API: stream answer tokens
+    API->>API: validate citations · strip invented · detect refusal
+    API-->>UI: NDJSON · step → sources → tokens → done
+    UI-->>U: cited answer (or honest refusal) + hidden-by-clearance count
+```
+
+</details>
+
+**Why it's shaped this way**
+
+- **Offline / online split** — indexing is heavy and reproducible (sha256 manifest, fingerprint-guarded); serving is light and stateless.
+- **RBAC at the data layer** — the clearance filter runs inside *both* retrieval branches, so restricted material is gone before fusion, rerank, or the model. *A prompt can't leak what was never retrieved.*
+- **Two-stage retrieval** — cheap hybrid recall (top-20) then an accurate cross-encoder rerank (top-5): precision without paying cross-encoder cost over the whole corpus.
+- **Swappable by config** — LiteLLM puts ollama / vLLM / cloud behind one interface (one line to move the LLM); embeddings + reranker ship a documented CPU↔GPU profile.
+- **Grounding is code, not vibes** — a parser validates every `[n]`, strips invented citations, and an exact `<NO_ANSWER/>` sentinel makes refusal measurable.
+- **Eval is a build artifact** — retrieval, leakage, and the RAG triad regenerate into `results/` and render live in the UI.
+
+**API surface** — `GET /health` · `POST /retrieve` · `POST /ask` · `POST /chat/stream` (NDJSON) · `GET /eval` · `GET /documents` · `GET /personas`
 
 ---
 
