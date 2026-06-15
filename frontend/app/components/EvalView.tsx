@@ -67,6 +67,14 @@ export function EvalView() {
     "nDCG@10": r["ndcg@10"] as number,
   }));
 
+  // Context-precision lift from rerank, read live from the generation eval (no hardcoded %).
+  const off = data.generation?.context_relevance;
+  const on = data.generation?.context_relevance_reranked;
+  const ctxLift =
+    off != null && on != null
+      ? ` (context precision ${Math.round(off * 100)}%→${Math.round(on * 100)}%)`
+      : "";
+
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="mx-auto max-w-4xl">
@@ -129,6 +137,11 @@ export function EvalView() {
               <div className="mt-1 font-mono text-cyan-400">
                 {data.sweep.winner.mode} · rerank {data.sweep.winner.rerank ? "on" : "off"}
               </div>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                Rank-order winner (hit@5 · MRR · nDCG), where hybrid+RRF already saturates. The{" "}
+                <span className="text-slate-300">live path keeps rerank on</span>
+                {ctxLift} — the cross-encoder still lifts answer-context precision.
+              </p>
             </div>
           </div>
         </div>

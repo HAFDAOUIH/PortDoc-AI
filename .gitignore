@@ -28,3 +28,7 @@ frontend/.env*.local
 
 # private interview/demo notebook — NOT for a public repo
 final.md
+
+# editor local-history + screenshot scratch (rejected/oversized captures)
+.history/
+docs/img/_unused/

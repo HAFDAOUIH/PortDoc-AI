@@ -1,5 +1,13 @@
 # PortDoc AI — Sovereign RAG over Port Security Documents
 
+<p align="center">
+  <img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-59%20passing-2ea44f">
+  <img alt="RBAC leakage" src="https://img.shields.io/badge/RBAC%20leakage-0%25-2ea44f">
+  <img alt="Inference" src="https://img.shields.io/badge/inference-100%25%20on--prem-00a3a3">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-lightgrey">
+</p>
+
 A **fully self-hosted** retrieval-augmented assistant over port security & operational
 documents, with **role-based access control enforced at retrieval**. Built as the kind of
 internal assistant **CIRES Technologies** (Tanger Med's security / data-sovereignty
@@ -11,6 +19,11 @@ ever leaves the host**.
 Ask a question  →  access-controlled hybrid retrieval  →  reranked top-k  →  cited French
 answer (or an honest refusal)  —  100% local: embeddings, reranker, and LLM all on-prem.
 ```
+
+<p align="center">
+  <img src="docs/img/ask-salma.png" alt="PortDoc AI answering a port-security question with inline citations and access-controlled sources" width="100%">
+  <br><sub><i>Ask in plain French → a cited answer drawn only from official documents, filtered to your clearance, generated 100% on-premise.</i></sub>
+</p>
 
 ---
 
@@ -34,6 +47,59 @@ answer (or an honest refusal)  —  100% local: embeddings, reranker, and LLM al
 - **💬 Product-grade UI** — a Next.js *Sovereign Command Center*: streaming answers, a persona
   switcher (the live RBAC demo), conversation history, a click-through source drawer, a document
   knowledge-base, plain-language business-value framing, and citation-forward grounding chips.
+
+---
+
+## See it in action
+
+A real query, end to end — ask in plain language, get an answer where **every sentence cites an
+official source**, click any `[n]` to read the exact passage, and never see a document above your
+clearance.
+
+### 1 · Grounded, cited answers — with click-through to the source
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/answer-detail.png" alt="Answer with inline citations and source cards"></td>
+<td width="50%"><img src="docs/img/source-drawer.png" alt="Clicking a citation opens the exact source passage"></td>
+</tr>
+</table>
+
+<sub>Every factual sentence ends in a <code>[n]</code> that resolves to a real, clickable source card
+(left). Click it and the exact cited passage opens in a drawer with its document, page and clearance
+(right). A parser validates every citation and <b>strips any the model invents</b> — grounding is
+<i>checked</i>, not hoped for.</sub>
+
+### 2 · Access control + honest refusal — in one view
+
+<p align="center">
+  <img src="docs/img/refusal-ooc.png" alt="A clearance-0 user: restricted sources hidden, and an explicit refusal instead of a fabricated answer" width="100%">
+</p>
+
+<sub>A Reception-desk user (clearance 0) asks something outside the corpus. Two things happen at once:
+the <b>🔒 banner</b> reports how many sources were filtered out by clearance — excluded at retrieval,
+before the model ever sees them (<b>measured leakage: 0 / 19 queries</b>) — and the assistant returns
+an explicit <b>“No answer”</b> rather than inventing one (<b>9 / 9</b> out-of-scope &amp; adversarial
+questions refused, <b>0 hallucinated</b>).</sub>
+
+<!-- BEST-IN-CLASS RBAC DIPTYCH — uncomment once docs/img/ask-nadia.png is captured
+     (Nadia, clearance 0, asks the SAME level-3 question → denied + 🔒 hidden):
+<table>
+<tr>
+<td width="50%"><img src="docs/img/ask-salma.png"><br><sub><b>Salma · PFSO · clearance 2</b> — answers from the restricted ISPS procedure.</sub></td>
+<td width="50%"><img src="docs/img/ask-nadia.png"><br><sub><b>Nadia · Reception · clearance 0</b> — same question, <b>🔒 5 sources hidden</b>.</sub></td>
+</tr>
+</table>
+-->
+
+### 3 · The knowledge base — every document, classified
+
+<p align="center">
+  <img src="docs/img/knowledge-base.png" alt="The corpus: 11 official documents tagged Public, Internal, or Restricted" width="100%">
+</p>
+
+<sub>11 official documents · 2,033 indexed passages, each tagged <b>Public · Internal · Restricted</b> —
+the labels that drive access control — held entirely on-premise.</sub>
 
 ---
 
@@ -155,6 +221,11 @@ for a stable URL use a named tunnel + a Cloudflare account.
 Evaluation is **first-class** here — three reproducible layers, all committed to
 [`results/`](results/): deterministic **retrieval** metrics, the **access-control** proof, and a
 strict **generation-quality** eval graded by a stronger judge.
+
+<p align="center">
+  <img src="docs/img/trust-panel.png" alt="The in-product Trust & Evaluation panel: retrieval sweep, 0% RBAC leakage, RAG triad, refusal discipline" width="100%">
+  <br><sub><i>Not a slide — rendered live in the product from the committed <a href="results/"><code>results/</code></a>: the retrieval config sweep, the 0% RBAC-leakage shield, and the RAG triad judged by a stronger model.</i></sub>
+</p>
 
 **1 · Retrieval** — deterministic, no LLM (hand-labelled set, fingerprint-guarded vs re-chunk drift):
 

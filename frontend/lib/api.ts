@@ -72,6 +72,7 @@ export type EvalData = {
     refuse_correct: number;
     hallucinated: string[];
     context_relevance: number | null;
+    context_relevance_reranked: number | null;
     answer_relevance: number | null;
     faithfulness: number | null;
     claims_total: number;

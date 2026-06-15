@@ -1,8 +1,8 @@
 "use client";
 
 /* Business-value ribbon under a completed answer. Plain language for managers:
-   how many official documents backed the answer, how fast, and a rough estimate
-   of manual research time saved. No RAG/ML jargon. */
+   how many official documents backed the answer and how fast — both measured,
+   nothing invented. No RAG/ML jargon. */
 
 import { motion } from "framer-motion";
 import { CheckCircle2, Clock, Sparkles } from "lucide-react";
@@ -15,8 +15,6 @@ export function ValueRibbon({
   tookMs: number;
 }) {
   const sec = Math.max(1, Math.round((tookMs || 0) / 1000));
-  // Rough, deliberately conservative estimate of manual search time displaced.
-  const estMinutes = Math.min(30, 12 + 4 * nSources);
 
   return (
     <motion.div
@@ -34,7 +32,7 @@ export function ValueRibbon({
         {sec}s
       </span>
       <span className="inline-flex items-center gap-1.5 text-slate-400">
-        <Sparkles className="h-3.5 w-3.5 text-cyan-400" />≈ {estMinutes} min of manual search saved
+        <Sparkles className="h-3.5 w-3.5 text-cyan-400" />No manual search through the source documents
       </span>
     </motion.div>
   );

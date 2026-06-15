@@ -41,9 +41,6 @@ export function SourceCard({
         </span>
         <VerifiedBadge />
         <ClrChip level={s.clearance} />
-        <span className="ml-auto font-mono text-[9px] text-slate-600">
-          rel {s.score.toFixed(2)}
-        </span>
       </div>
 
       <div className="text-[11px] font-medium text-slate-200">
