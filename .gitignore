@@ -26,8 +26,10 @@ frontend/.env*.local
 # logs
 *.log
 
-# private interview/demo notebook — NOT for a public repo
+# private interview/demo notebook + live-demo runbook — NOT for a public repo
 final.md
+DEMO_RUNBOOK.md
+DEMO_QUESTIONS.md
 
 # editor local-history + screenshot scratch (rejected/oversized captures)
 .history/
